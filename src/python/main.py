@@ -1,6 +1,7 @@
 # Initalization code
 
 import depthai
+import io
 
 def main():
     print("Test")

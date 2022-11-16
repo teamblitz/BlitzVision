@@ -101,7 +101,7 @@ prev_frame_time = 0
 # used to record the time at which we processed current frame
 new_frame_time = 0
 
-cam = cv2.VideoCapture(1, cv2.CAP_DSHOW) # this is the magic!
+cam = cv2.VideoCapture(0, cv2.CAP_DSHOW) # this is the magic!
 
 cv2.namedWindow("apriltag")
 img_counter = 0
@@ -123,7 +123,7 @@ objectPointsArray = []
 imgPointsArray = []
 
 # Loop over the image files
-for path in glob.glob('C:/Users/TeamBlitz/Documents/TENVISHD1080pCamCalibration/opencv_frame_*.png'):
+for path in glob.glob('C:/Users/noahb/Documents/tags/opencv_frame_*.png'):
     # Load the image and convert it to gray scale
     img = cv2.imread(path)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -198,7 +198,7 @@ while True:
         for tagnum in range (0, len(result)):
             tag = result[tagnum]
             
-            if(tag.tag_id == 0 and tag.hamming < 1):
+            if(tag.hamming < 1):
             
                 #print (tag)
                 x1 = int(tag.corners[0][0])
@@ -264,6 +264,12 @@ while True:
                 cv2.putText(aprilimgclr, xlabelstring, (int(tag.center[0]), int(tag.center[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
                 cv2.putText(aprilimgclr, ylabelstring, (int(tag.center[0]), int(tag.center[1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
                 cv2.putText(aprilimgclr, zlabelstring, (int(tag.center[0]), int(tag.center[1]) + textyheight * 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+
+                # cv2.putText(aprilimgclr, '0', (int(tag.corners[0][0]), int(tag.corners[0][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                # cv2.putText(aprilimgclr, '1', (int(tag.corners[1][0]), int(tag.corners[1][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                # cv2.putText(aprilimgclr, '2', (int(tag.corners[2][0]), int(tag.corners[2][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                # cv2.putText(aprilimgclr, '3', (int(tag.corners[3][0]), int(tag.corners[3][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                
                 
                 #draw_pose(self,overlay, camera_params, tag_size, pose, z_sign=1):
                 

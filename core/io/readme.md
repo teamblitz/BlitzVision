@@ -1,1 +1,0 @@
-This directory contins the files responsible for input from hardware such as cameras.

@@ -15,6 +15,7 @@ class MultiThreadProvider:
         
         @param name - name for debuging purposes'''
         # A list containing all of the output queues
+        # TODO: Maybe convert to a set.
         self.output_queues: list[Queue] = []
         self.lock = Lock()
         self.supplier = supplier
@@ -22,13 +23,14 @@ class MultiThreadProvider:
 
         thread = Thread(target=self.run(), name=f"MultiThreadProvider {name}")
         thread.start()
-
-
     
-    def register_output_queue(self, queue):
+    def subscribe_output_queue(self, queue):
         '''Register a new output queue. Images are added to the queue as availible. It is the responsibility of the thread using the queue to keep it not full. If the queue fills up then new frames will no longer be added to the queue.'''
         with self.lock: # This is likely unnecessary but it is here as a redundancy
             self.output_queues.append(queue) # .append() is thread safe per https://docs.python.org/3/faq/library.html#what-kinds-of-global-value-mutation-are-thread-safe
+        
+    def unsubscribe_output_queue(self, queue):
+        self.output_queues.remove(queue)
 
     def run(self):
         while True:
@@ -43,5 +45,5 @@ class MultiThreadProvider:
                         queue.put_nowait((output, timestamp))
                 except:
                     logger.critical(f"Error occurred while adding outputs to queue of type {type(queue)} on MultiThreadProvider {self.name}. Faital, This may lead to threads hanging. This most likly occured because a different queue implementation then the built in python Queue was used. ", exc_info=1)
-                    self.output_queues.remove(queue) # Remove the queue to prevent spam.
+                    self.unsubscribe_output_queue(queue) # Remove the queue to prevent spam.
 

@@ -1,0 +1,21 @@
+/* * {
+    
+} */
+html, body {
+    background-color: #5b5b5b;
+    height: 100%;
+    margin: 0;
+}
+#menu-container {
+    left: 0px;
+    top: 0px;
+    height: 100%;
+    width: 20%;
+    background-color: powderblue;
+}
+.menu-item {
+    text-align: center;
+    height: 10%;
+    background-color: blueviolet;
+}
+

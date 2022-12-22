@@ -1,7 +1,7 @@
 import pupil_apriltags
 import cv2
 
-class Detector:
+class ApriltagDetector:
 
     # Default detector settings
     # You must call update_settings after modifiying these perameters for them to have any effect.

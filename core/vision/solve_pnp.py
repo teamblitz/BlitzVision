@@ -4,7 +4,7 @@ from scipy.spatial.transform import Rotation as R
 from pupil_apriltags import Detection
 
 
-def solve(detection: list[Detection], tag_groups: dict[str], camera_matrix, dist_coeffs):
+def solve(detection: list[Detection], tag_groups: list[dict[str, ]], camera_matrix, dist_coeffs):
     solutions = []
     
     for tag_group in tag_groups:
@@ -20,8 +20,8 @@ def solve(detection: list[Detection], tag_groups: dict[str], camera_matrix, dist
                 i += 1
         rVec = None
         tVec = None
-        cv2.solvePnP(object_points, image_points, camera_matrix, dist_coeffs, rVec, tVec)
-        solutions.append((rVec, tVec))
+        ret, rVec_out, tVec_out = cv2.solvePnP(object_points, image_points, camera_matrix, dist_coeffs, rVec, tVec)
+        solutions.append((rVec_out, tVec_out))
     return solutions
 
 

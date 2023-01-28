@@ -1,1 +1,0 @@
-This directory contains the bulk of the vision pipeline. 

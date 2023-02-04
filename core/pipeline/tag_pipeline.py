@@ -19,10 +19,10 @@ class ApriltagPipeline(VisionPipeline):
     
     def run(self):
         while True:
-            for frame, timestamp, id in self.inputQueue.get():
+            for frame, timestamp, cam_id in self.inputQueue.get():
                 detections: list[Detection] = self.detector.detect(frame)
                 outputs = []
                 for detection in detections:
                     if detection.hamming > self.max_error:
-                        outputs.append((detection, timestamp, id))
+                        outputs.append((detection.tag_id, detection.tag_family, detection.corners, detection.center,  timestamp, cam_id))
                         

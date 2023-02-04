@@ -3,7 +3,7 @@ import time
 import os
 import subprocess
 
-from camera_reader import CameraReader, ListenerFunction
+from camera_reader import CameraReader, ListenerFunction, Cv2Mat
 
 
 def resize(frame, dst_width):
@@ -45,7 +45,9 @@ class QuadCameraReader(CameraReader):
         
     
         while True:
-            ret, frame = self.cap.read()
+            self.cap.grab()
+            timestamp = time.time()
+            ret, frame = self.cap.retrieve()
 
             # We have to do this because convert rgb is off.
             w = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -54,6 +56,21 @@ class QuadCameraReader(CameraReader):
 
             # Convert to rby
             frame = cv2.cvtColor(frame, cv2.COLOR_BAYER_BG2BGR)
+
+
+            # Split the frame into the streams from each camera.
+            width, height = frame.size
+
+            step = width / 4
+
+            frames = [
+                frame[0:h, step*0: step*1].copy(),
+                frame[0:h, step*1: step*2].copy(),
+                frame[0:h, step*2: step*3].copy(),
+                frame[0:h, step*3: step*4].copy()
+            ]
+
+            self.listener()
 
             # resize for display TODO Remove later
             # frame = resize(frame, 1280.0)

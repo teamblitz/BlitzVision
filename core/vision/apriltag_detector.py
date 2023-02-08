@@ -2,26 +2,26 @@ import pupil_apriltags
 import cv2
 import numpy as np
 
-class ApriltagDetector:
 
+class ApriltagDetector:
     # Default detector settings
     # You must call update_settings after modifiying these perameters for them to have any effect.
 
-    families='tag16h5'
-    nthreads=1
-    quad_decimate=0.0
-    quad_sigma=0.0
-    refine_edges=1
-    decode_sharpening=0.25
-    debug=0
+    families = 'tag16h5'
+    nthreads = 1
+    quad_decimate = 0.0
+    quad_sigma = 0.0
+    refine_edges = 1
+    decode_sharpening = 0.25
+    debug = 0
 
     detector = pupil_apriltags.Detector(families='tag16h5',
-                        nthreads=nthreads,
-                        quad_decimate=quad_decimate,
-                        quad_sigma=quad_sigma,
-                        refine_edges=refine_edges,
-                        decode_sharpening=decode_sharpening,
-                        debug=debug)
+                                        nthreads=nthreads,
+                                        quad_decimate=quad_decimate,
+                                        quad_sigma=quad_sigma,
+                                        refine_edges=refine_edges,
+                                        decode_sharpening=decode_sharpening,
+                                        debug=debug)
 
     def __init__(self):
         pass
@@ -34,9 +34,9 @@ class ApriltagDetector:
     # Create a new detector because we can't modify the original detector.
     def update_settings(self):
         self.detector = pupil_apriltags.Detector(families='tag16h5',
-                        nthreads=self.nthreads,
-                        quad_decimate=self.quad_decimate,
-                        quad_sigma=self.quad_sigma,
-                        refine_edges=self.refine_edges,
-                        decode_sharpening=self.decode_sharpening,
-                        debug=self.debug)
+                                                 nthreads=self.nthreads,
+                                                 quad_decimate=self.quad_decimate,
+                                                 quad_sigma=self.quad_sigma,
+                                                 refine_edges=self.refine_edges,
+                                                 decode_sharpening=self.decode_sharpening,
+                                                 debug=self.debug)

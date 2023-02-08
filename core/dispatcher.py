@@ -11,14 +11,20 @@ class Dispatcher:
 
     def __init__(self):
         self.quadCamera = QuadCameraReader((lambda x: self.listener(0, x)))
-
+        self.quadCamera.start()
 
         self.cameraPipelines: List[Dict[str, VisionPipeline]] = [
             {
-                "tag": ApriltagPipeline(0,"QuadCamera")
+                "tag": ApriltagPipeline(0, "QuadCamera")
             }
         ]
 
+        self.cameraPipelines["tag"].start()
+
     def listener(self, pipeline_id, frames):
-        if "tag" in self.cameraPipelines[pipeline_id].keys() and not self.cameraPipelines[pipeline_id]["tag"].isBusy():
-            self.cameraPipelines[pipeline_id]["tag"].addFrames(frames)
+        if "tag" in self.cameraPipelines[pipeline_id].keys() and not self.cameraPipelines[pipeline_id]["tag"].is_busy():
+            self.cameraPipelines[pipeline_id]["tag"].add_frames(frames)
+
+
+if __name__ == "__main__":
+    dispatcher = Dispatcher()

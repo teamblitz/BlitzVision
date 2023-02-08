@@ -4,7 +4,7 @@ import os
 import subprocess
 
 from camera_reader import CameraReader, ListenerFunction, Cv2Mat
-from core.time_manager import TimeManager
+import time_manager
 
 
 def resize(frame, dst_width):
@@ -54,15 +54,15 @@ class QuadCameraReader(CameraReader):
             frame = cv2.cvtColor(frame, cv2.COLOR_BAYER_BG2BGR)
 
             # Split the frame into the streams from each camera.
-            width, height = frame.size
+            height, width, _ = frame.shape
 
-            step = width / 4
+            step = int(width / 4)
 
             frames = [
-                (frame[0:h, step * 0: step * 1].copy(), TimeManager.get_timestamp(), 0),
-                (frame[0:h, step * 1: step * 2].copy(), TimeManager.get_timestamp(), 1),
-                (frame[0:h, step * 2: step * 3].copy(), TimeManager.get_timestamp(), 2),
-                (frame[0:h, step * 3: step * 4].copy(), TimeManager.get_timestamp(), 3)
+                (frame[0:height, step * 0: step * 1].copy(), time_manager.get_instance().get_timestamp(), 0),
+                (frame[0:height, step * 1: step * 2].copy(), time_manager.get_instance().get_timestamp(), 1),
+                (frame[0:height, step * 2: step * 3].copy(), time_manager.get_instance().get_timestamp(), 2),
+                (frame[0:height, step * 3: step * 4].copy(), time_manager.get_instance().get_timestamp(), 3)
             ]
 
             self.listener(frames)

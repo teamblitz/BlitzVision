@@ -5,7 +5,7 @@ import cv2
 class VisualOutputProcessor:
 
     def __init__(self):
-        self.tag_detections = []
+        self.tag_detections = [[], [], [], []]
 
     def display_frame(self, frame, cam_id):
         display_frame = frame.copy()

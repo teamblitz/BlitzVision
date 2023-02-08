@@ -3,7 +3,7 @@ import socket
 from threading import Thread
 from time import sleep
 
-from core.time_manager import TimeManager
+from time_manager import TimeManager
 
 
 class RobotCommunicator(Thread):

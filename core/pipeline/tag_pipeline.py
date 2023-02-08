@@ -4,25 +4,30 @@ from typing import Tuple, Union, Any
 import cv2
 
 from pupil_apriltags import Detection
-from core.pipeline.vision_pipeline import VisionPipeline
+from pipeline.vision_pipeline import VisionPipeline
 
-from core.vision.apriltag_detector import ApriltagDetector
+from vision.apriltag_detector import ApriltagDetector
 
 
 class ApriltagPipeline(VisionPipeline):
     max_error: int = 0
 
-    def __init__(self, id: int, name: str):
-        super().__init__(f"tag{id}{name}")
+    def __init__(self, _id: int, name: str, output_processor):
+        super().__init__(f"tag{_id}{name}")
 
         self.detector = ApriltagDetector()
+        self.output_processor = output_processor
 
     def run(self):
         while True:
-            for frame, timestamp, cam_id in self.inputQueue.get():
-                detections: list[Detection] = self.detector.detect(frame)
-                outputs = []
-                for detection in detections:
-                    if detection.hamming > self.max_error:
-                        outputs.append((detection.tag_id, detection.tag_family, detection.corners, detection.center,
-                                        timestamp, cam_id))
+            things = self.inputQueue.get()
+            frame, timestamp, cam_id = things
+            detections: list[Detection] = self.detector.detect(frame)
+            outputs = []
+            for detection in detections:
+                if detection.hamming > self.max_error:
+                    outputs.append((detection.tag_id, detection.tag_family, detection.corners, detection.center,
+                                    timestamp, cam_id))
+            #TODO: We can't do this once we add tag tracking and will need to be smarter
+            self.output_processor.clear_tag_detections(cam_id)
+            self.output_processor.add_tag_detections(cam_id, outputs)

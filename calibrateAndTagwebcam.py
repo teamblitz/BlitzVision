@@ -101,7 +101,7 @@ prev_frame_time = 0
 # used to record the time at which we processed current frame
 new_frame_time = 0
 
-cam = cv2.VideoCapture(0, cv2.CAP_DSHOW) # this is the magic!
+cam = cv2.VideoCapture(1) # this is the magic!
 
 cv2.namedWindow("apriltag")
 img_counter = 0
@@ -123,50 +123,52 @@ objectPointsArray = []
 imgPointsArray = []
 
 # Loop over the image files
-for path in glob.glob('C:/Users/noahb/Documents/tags/opencv_frame_*.png'):
-    # Load the image and convert it to gray scale
-    img = cv2.imread(path)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# for path in glob.glob('C:/Users/noahb/Documents/tags/opencv_frame_*.png'):
+#     # Load the image and convert it to gray scale
+#     img = cv2.imread(path)
+#     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Find the chess board corners
-    ret, corners = cv2.findChessboardCorners(gray, (rows, cols), None)
+#     # Find the chess board corners
+#     ret, corners = cv2.findChessboardCorners(gray, (rows, cols), None)
 
-    # Make sure the chess board pattern was found in the image
-    if ret:
-        # Refine the corner position
-        corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+#     # Make sure the chess board pattern was found in the image
+#     if ret:
+#         # Refine the corner position
+#         corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
         
-        # Add the object points and the image points to the arrays
-        objectPointsArray.append(objectPoints)
-        imgPointsArray.append(corners)
+#         # Add the object points and the image points to the arrays
+#         objectPointsArray.append(objectPoints)
+#         imgPointsArray.append(corners)
 
-        # Draw the corners on the image
-        cv2.drawChessboardCorners(img, (rows, cols), corners, ret)
+#         # Draw the corners on the image
+#         cv2.drawChessboardCorners(img, (rows, cols), corners, ret)
     
-    # Display the image
-    #cv2.imshow('chess board', img)
-    #cv2.waitKey(50)
+#     # Display the image
+#     #cv2.imshow('chess board', img)
+#     #cv2.waitKey(50)
 
-# Calibrate the camera and save the results
-ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objectPointsArray, imgPointsArray, gray.shape[::-1], None, None)
-np.savez('new_calibration_arrays.npz', mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
+# # Calibrate the camera and save the results
+# ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objectPointsArray, imgPointsArray, gray.shape[::-1], None, None)
+# # np.savez('new_calibration_arrays.npz', mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
 
-fx = mtx[0][0]
-fy = mtx[1][1]
-cx = mtx[0][2]
-cy = mtx[1][2]
+# fx = mtx[0][0]
+# fy = mtx[1][1]
+# cx = mtx[0][2]
+# cy = mtx[1][2]
 
 #aprilimg = cv2.imread('TENVISHD1080pApriltag\opencv_frame_4.png', cv2.IMREAD_GRAYSCALE)
 #aprilimgclr = cv2.cvtColor(aprilimg,cv2.COLOR_GRAY2BGR)
 #cv2.imshow('apriltag', aprilimgclr)
 
-detector = pupil_apriltags.Detector(families='tag16h5',
+detector = pupil_apriltags.Detector(families='tag36h11',
                        nthreads=1,
-                       quad_decimate=0.0,
+                       quad_decimate=2.0,
                        quad_sigma=0.0,
                        refine_edges=1,
                        decode_sharpening=0.25,
-                       debug=0)
+                       debug=0
+                    #    searchpath=["/usr/local/lib"]
+                       )
 
 while True:
     ret, aprilimgclr = cam.read()
@@ -188,13 +190,13 @@ while True:
 
 
     aprilimg = cv2.cvtColor(aprilimgclr,cv2.COLOR_BGR2GRAY)
-
-    result = detector.detect(aprilimg, estimate_tag_pose=True, camera_params= ([fx, fy, cx, cy]), tag_size=apriltag_size)
+    #camera_params= ([fx, fy, cx, cy]), 
+    result = detector.detect(aprilimg) #, estimate_tag_pose=False, tag_size=apriltag_size)
 
     #print (result)
 
     if (len(result) > 0):
-
+        print("tags!")
         for tagnum in range (0, len(result)):
             tag = result[tagnum]
             

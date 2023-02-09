@@ -42,8 +42,9 @@ class VisualOutputProcessor:
 
             cv2.putText(display_frame, str(id), (int(center[0]), int(center[1]) + textyheight * 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
         
-        frame = resize(frame, 640.0)
+        display_frame = resize(display_frame, 640.0)
         cv2.imshow(str(cam_id), display_frame)
+        cv2.waitKey(1)
 
             
 

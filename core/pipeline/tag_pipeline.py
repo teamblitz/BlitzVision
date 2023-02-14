@@ -12,26 +12,47 @@ from vision.apriltag_detector import ApriltagDetector
 class ApriltagPipeline(VisionPipeline):
     max_error: int = 0
 
-    def __init__(self, _id: int, name: str, output_processor):
+    def __init__(self, _id: int, name: str, visual_output_processor, robot_output_processor):
         super().__init__(f"tag{_id}{name}")
 
+        self.visual_output_processor = visual_output_processor
+        self.robot_output_processor = robot_output_processor
         self.detector = ApriltagDetector()
-        self.output_processor = output_processor
 
     def run(self):
         while True:
-            things = self.inputQueue.get()
-            frame, timestamp, cam_id = things
-            detections: list[Detection] = self.detector.detect(frame)
             outputs = []
-            for detection in detections:
-                if detection.hamming <= self.max_error:
-                    outputs.append((detection.tag_id, detection.tag_family, detection.corners, detection.center,
-                                    timestamp, cam_id))
-                    if detection.tag_id != 7:
-                        print(detection)
-            #TODO: We can't do this once we add tag tracking and will need to be smarter
-            self.output_processor.clear_tag_detections(cam_id)
-            self.output_processor.add_tag_detections(cam_id, outputs)
+            for cam_in in self.inputQueue.get():
+                frame, timestamp, cam_id, areas_of_interest = cam_in
+
+                output = []
+
+                # Area of interest is a tuple ((x1,y1),(x2,y2))
+                for area_of_interest in areas_of_interest:
+                    (x1, y1), (x2, y2) = area_of_interest
+                    processing_frame = frame[y1:y2, x1:x2, :]
+                    detections: list[Detection] = self.detector.detect(processing_frame)
+                    for detection in detections:
+                        if detection.hamming <= self.max_error:
+                            translated_corners = [translate_translate_coordinates(x, y, area_of_interest[0]) for x, y in
+                                                  detection.corners]
+                            translated_center = translate_translate_coordinates(detection.center[0],
+                                                                                detection.center[1],
+                                                                                area_of_interest[0])
+                            output.append(
+                                (detection.tag_id, detection.tag_family, translated_corners, translated_center,
+                                 timestamp, cam_id))
+
+                outputs.append((output, cam_id, timestamp))
+
+            if len(outputs) == 4:
+                self.robot_output_processor.process_quad_cam(outputs)
+            else:
+                print("SOMTHING IS WRONG, 4 frames expected for camera pnp!")
+
             if self.inputQueue.empty():
                 self.set_busy(False)
+
+
+def translate_translate_coordinates(x, y, crop_start):
+    return x + crop_start[0], y + crop_start[1]

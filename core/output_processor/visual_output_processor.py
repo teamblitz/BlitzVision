@@ -10,7 +10,6 @@ class VisualOutputProcessor:
     def display_frame(self, frame, cam_id):
         display_frame = frame.copy()
 
-
         for tag_detection in self.tag_detections[cam_id]:
             id, family, corners, center, timestamp, camera_id = tag_detection
             x1 = int(corners[0][0])
@@ -40,18 +39,16 @@ class VisualOutputProcessor:
             textSize, baseline = cv2.getTextSize(str(id), cv2.FONT_HERSHEY_SIMPLEX, 1, 2)
             textyheight = textSize[1] + baseline
 
-            cv2.putText(display_frame, str(id), (int(center[0]), int(center[1]) + textyheight * 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
-        
+            cv2.putText(display_frame, str(id), (int(center[0]), int(center[1]) + textyheight * 2),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+
         display_frame = resize(display_frame, 640.0)
         cv2.imshow(str(cam_id), display_frame)
         cv2.waitKey(1)
 
-            
-
     def add_tag_detections(self, cam_id, tag_detections):
         for tag_detection in tag_detections:
             self.tag_detections[cam_id].append(tag_detection)
-
 
     def clear_tag_detections(self, cam_id):
         self.tag_detections[cam_id].clear()

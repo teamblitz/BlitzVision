@@ -20,9 +20,8 @@ class VisionPipeline(Thread):
 
     def add_frames(self, frames):
         if not self.is_busy():
-            for frame in frames:
-                try:
-                    self.inputQueue.put_nowait(frame)
-                except Full:
-                    print(f"Error adding frame to {self.pipelineName} vision pipeline, pipeline queue full.")
+            try:
+                self.inputQueue.put_nowait(frames)
+            except Full:
+                print(f"Error adding frame to {self.pipelineName} vision pipeline, pipeline queue full.")
             self.set_busy(True)

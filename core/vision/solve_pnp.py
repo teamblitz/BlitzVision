@@ -32,7 +32,7 @@ def compute_tag_corers(tag: dict[str, float]) -> list[float]:
     rotated_tag = [] # Empty list for the new corners.
 
     # The wpi cordinate system is left is positive y.
-    # Corner 0 is the lower left corner with roll 0. with 1 though 3 counter clockwise around the tag.
+    # Corner 0 is the lower left corner with roll 0. with 1 though 3 counterclockwise around the tag.
     # Compute a flat tag at the origin. This tag is facing X- and we will need to rotate it to face X+
     flat_tag = np.array(
         [

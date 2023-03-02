@@ -108,23 +108,28 @@ class RobotOutputProcessor:
         }
 
         # The cameras are numbered 0 to 3.
-        # 0 is front left
-        # 1 is back left
-        # 2 is front right
-        # 3 is back right
+        # 0 is front right
+        # 1 is back right
+        # 2 is front left
+        # 3 is back left
         # units=meters
         between_mounts = units.inches_to_meters(12)
         front_to_edge = units.millimeters_to_meters(19.77)
         back_to_edge = units.millimeters_to_meters(18)
+        # These angles
         self.camera_transforms = [
             multi_cam_pnp.calc_cam_to_general_transform(
-                ([0.02, -(between_mounts / 2 + front_to_edge), 0], R.from_euler("ZYX", [-37.5, 0, 0]))),
+                ([0.02, (between_mounts / 2 + front_to_edge), 0],
+                 R.from_euler("ZXY", [37.5, 0, 0], degrees=True).as_matrix())),
             multi_cam_pnp.calc_cam_to_general_transform(
-                ([-0.02, -(between_mounts / 2 + back_to_edge), 0], R.from_euler("ZYX", [-154.39, 0, 0]))),
+                ([-0.02, (between_mounts / 2 + front_to_edge), 0],
+                 R.from_euler("ZXY", [154.39, 0, 0], degrees=True).as_matrix())),
             multi_cam_pnp.calc_cam_to_general_transform(
-                ([0.02, (between_mounts / 2 + front_to_edge), 0], R.from_euler("ZYX", [37.5, 0, 0]))),
+                ([0.02, -(between_mounts / 2 + front_to_edge), 0],
+                 R.from_euler("ZXY", [-37.5, 0, 0], degrees=True).as_matrix())),
             multi_cam_pnp.calc_cam_to_general_transform(
-                ([-0.02, (between_mounts / 2 + front_to_edge), 0], R.from_euler("ZYX", [154.39, 0, 0])))
+                ([-0.02, -(between_mounts / 2 + back_to_edge), 0],
+                 R.from_euler("ZXY", [-154.39, 0, 0], degrees=True).as_matrix()))
         ]
 
         self.camera_matrices = []

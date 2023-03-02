@@ -101,7 +101,7 @@ prev_frame_time = 0
 # used to record the time at which we processed current frame
 new_frame_time = 0
 
-cam = cv2.VideoCapture(1) # this is the magic!
+cam = cv2.VideoCapture(0) # this is the magic!
 
 cv2.namedWindow("apriltag")
 img_counter = 0
@@ -160,7 +160,7 @@ imgPointsArray = []
 #aprilimgclr = cv2.cvtColor(aprilimg,cv2.COLOR_GRAY2BGR)
 #cv2.imshow('apriltag', aprilimgclr)
 
-detector = pupil_apriltags.Detector(families='tag36h11',
+detector = pupil_apriltags.Detector(families='tag16h5',
                        nthreads=1,
                        quad_decimate=2.0,
                        quad_sigma=0.0,
@@ -196,7 +196,6 @@ while True:
     #print (result)
 
     if (len(result) > 0):
-        print("tags!")
         for tagnum in range (0, len(result)):
             tag = result[tagnum]
             
@@ -232,29 +231,32 @@ while True:
                 pose_mat = tag.pose_R
                 pose_t = [0,0,0]
 
-                pose_t[0] = tag.pose_t[0]
-                pose_t[1] = tag.pose_t[1]
-                pose_t[2] = tag.pose_t[2]
+                # pose_t[0] = tag.pose_t[0]
+                # pose_t[1] = tag.pose_t[1]
+                # pose_t[2] = tag.pose_t[2]
 
                 # xlabelstring = "X:" + str(pose_t[0])
                 # ylabelstring = "Y:" + str(pose_t[1])
                 # zlabelstring = "Z:" + str(pose_t[2])
 
+                xlabelstring = "X:"
+                ylabelstring = "Y:"
+                zlabelstring = "Z:"
                 
                 #ref https://gitlab.eecs.umich.edu/njanne/opencv-apriltag/-/blob/7a8530981fbc71bf7eb620ee1ea0ac11e82383bd/apriltag_pose_lcm.py#L74
-                rot_matrix = R.from_matrix(pose_mat)
-                pose_raw = rot_matrix.apply(np.resize(np.asarray(pose_t), 3), True)
-                eulers = rot_matrix.as_euler('yxz', degrees=True) #Y=H, 
+                # rot_matrix = R.from_matrix(pose_mat)
+                # pose_raw = rot_matrix.apply(np.resize(np.asarray(pose_t), 3), True)
+                # eulers = rot_matrix.as_euler('yxz', degrees=True) #Y=H,
                 # print(eulers) 
 
-                xlabelstring = "Y:" + str(np.around(eulers[0], 2))
-                ylabelstring = "P:" + str(np.around(eulers[1], 2))
-                zlabelstring = "R:" + str(np.around(eulers[2], 2))
+                # xlabelstring = "Y:" + str(np.around(eulers[0], 2))
+                # ylabelstring = "P:" + str(np.around(eulers[1], 2))
+                # zlabelstring = "R:" + str(np.around(eulers[2], 2))
 
-                pose_relative = [0,0,0]
-                pose_relative[0] = pose_raw[1]
-                pose_relative[1] = -pose_raw[2]
-                pose_relative[2] = pose_raw[0]
+                # pose_relative = [0,0,0]
+                # pose_relative[0] = pose_raw[1]
+                # pose_relative[1] = -pose_raw[2]
+                # pose_relative[2] = pose_raw[0]
 
                 # xlabelstring = "X:" + str(pose_relative[0])
                 # ylabelstring = "Y:" + str(pose_relative[1])
@@ -263,14 +265,14 @@ while True:
                 textSize, baseline = cv2.getTextSize(xlabelstring, font, 1, 2)
                 textyheight = textSize[1] + baseline
                 cv2.rectangle(aprilimgclr, (int(tag.center[0]), int(tag.center[1] - textyheight)), (int(tag.center[0] + textSize[0]), int(tag.center[1]) + textyheight * 2), (255, 255, 255), -1)
-                cv2.putText(aprilimgclr, xlabelstring, (int(tag.center[0]), int(tag.center[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
-                cv2.putText(aprilimgclr, ylabelstring, (int(tag.center[0]), int(tag.center[1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
-                cv2.putText(aprilimgclr, zlabelstring, (int(tag.center[0]), int(tag.center[1]) + textyheight * 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                # cv2.putText(aprilimgclr, xlabelstring, (int(tag.center[0]), int(tag.center[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                # cv2.putText(aprilimgclr, ylabelstring, (int(tag.center[0]), int(tag.center[1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                # cv2.putText(aprilimgclr, zlabelstring, (int(tag.center[0]), int(tag.center[1]) + textyheight * 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
 
-                # cv2.putText(aprilimgclr, '0', (int(tag.corners[0][0]), int(tag.corners[0][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
-                # cv2.putText(aprilimgclr, '1', (int(tag.corners[1][0]), int(tag.corners[1][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
-                # cv2.putText(aprilimgclr, '2', (int(tag.corners[2][0]), int(tag.corners[2][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
-                # cv2.putText(aprilimgclr, '3', (int(tag.corners[3][0]), int(tag.corners[3][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                cv2.putText(aprilimgclr, '0', (int(tag.corners[0][0]), int(tag.corners[0][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                cv2.putText(aprilimgclr, '1', (int(tag.corners[1][0]), int(tag.corners[1][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                cv2.putText(aprilimgclr, '2', (int(tag.corners[2][0]), int(tag.corners[2][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
+                cv2.putText(aprilimgclr, '3', (int(tag.corners[3][0]), int(tag.corners[3][1]) + textyheight), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 128, 128), 2)
                 
                 
                 #draw_pose(self,overlay, camera_params, tag_size, pose, z_sign=1):

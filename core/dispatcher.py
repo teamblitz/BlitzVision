@@ -1,3 +1,4 @@
+from core.output_processor.robot_output_processor import RobotOutputProcessor
 from pipeline.tag_pipeline import ApriltagPipeline
 from pipeline.vision_pipeline import VisionPipeline
 from quad_camera_reader import QuadCameraReader
@@ -19,10 +20,11 @@ class Dispatcher:
         self.quadCamera = QuadCameraReader((lambda x: self.listener(0, x)))
         self.quadCamera.start()
         self.vop = VisualOutputProcessor()
+        self.rop = RobotOutputProcessor(4)
 
         self.cameraPipelines: List[Dict[str, VisionPipeline]] = [
             {
-                "tag": ApriltagPipeline(0, "QuadCamera", self.vop)
+                "tag": ApriltagPipeline(0, "QuadCamera", self.vop, self.rop)
             }
         ]
 

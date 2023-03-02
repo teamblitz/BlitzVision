@@ -10,10 +10,9 @@ def calc_cam_to_general_transform(cam_pose):
 
     returns: homogeneous transform matrix Tcg that transforms points from the camera, to general coordinate frame
     """
+
     transform = np.zeros((4, 4))
-    transform[0:3, 0:3] = np.array(([0, 0, 1],
-                                    [-1, 0, 0],
-                                    [0, -1, 0])) @ cam_pose[1]
+    transform[0:3, 0:3] = cam_pose[1]
     transform[0:3, 3] = cam_pose[0]
     transform[3, 3] = 1
     return transform
@@ -37,7 +36,9 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
     object_points = []
     for i in range(0, 4):
         undistorted_points = cv2.undistortPoints(img_points[i], camera_matrices[i], dist_coeffs[i],
-                                                 R=cam_general_transforms[i][0:3, 0:3])
+                                                 R=cam_general_transforms[i][0:3, 0:3] @ np.array(([0, 0, 1],
+                                                                                                   [-1, 0, 0],
+                                                                                                   [0, -1, 0])))
         for j in range(len(undistorted_points)):
             # make the point a vector
             point = np.empty(3)

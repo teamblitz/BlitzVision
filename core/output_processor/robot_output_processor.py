@@ -7,8 +7,8 @@ from scipy import linalg
 from scipy.spatial.transform import Rotation as R
 from networktables import NetworkTables
 
-import core.utils.units as units
-import core.vision.multi_cam_pnp as multi_cam_pnp
+import utils.units as units
+import vision.multi_cam_pnp as multi_cam_pnp
 
 valid_ids = {"16h5": (1, 2, 3, 4, 5, 6, 7, 8), "25h9": (1, 2)}
 valid_families = valid_ids.keys()

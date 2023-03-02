@@ -1,4 +1,4 @@
-from core.output_processor.robot_output_processor import RobotOutputProcessor
+from output_processor.robot_output_processor import RobotOutputProcessor
 from pipeline.tag_pipeline import ApriltagPipeline
 from pipeline.vision_pipeline import VisionPipeline
 from quad_camera_reader import QuadCameraReader

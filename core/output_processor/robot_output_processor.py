@@ -10,7 +10,7 @@ from networktables import NetworkTables
 import utils.units as units
 import vision.multi_cam_pnp as multi_cam_pnp
 
-valid_ids = {"16h5": (1, 2, 3, 4, 5, 6, 7, 8), "25h9": (1, 2)}
+valid_ids = {"tag16h5": (1, 2, 3, 4, 5, 6, 7, 8), "tag25h9": (1, 2)}
 valid_families = valid_ids.keys()
 
 
@@ -51,7 +51,7 @@ class RobotOutputProcessor:
 
         # Defined constants
         self.april_tag_transforms = {
-            "16h5": {
+            "tag16h5": {
                 # Red side of the field
                 1: compute_tag_transform([units.inches_to_meters(610.77),
                                           units.inches_to_meters(42.19),
@@ -95,15 +95,15 @@ class RobotOutputProcessor:
         # further points could be used for the drivers station tags
         size = units.inches_to_meters(6)
         self.april_tag_corners = {
-            "16h5": {
-                1: compute_tag_corners(self.april_tag_transforms["16h5"][1], size),
-                2: compute_tag_corners(self.april_tag_transforms["16h5"][2], size),
-                3: compute_tag_corners(self.april_tag_transforms["16h5"][3], size),
-                4: compute_tag_corners(self.april_tag_transforms["16h5"][4], size),
-                5: compute_tag_corners(self.april_tag_transforms["16h5"][5], size),
-                6: compute_tag_corners(self.april_tag_transforms["16h5"][6], size),
-                7: compute_tag_corners(self.april_tag_transforms["16h5"][7], size),
-                8: compute_tag_corners(self.april_tag_transforms["16h5"][8], size)
+            "tag16h5": {
+                1: compute_tag_corners(self.april_tag_transforms["tag16h5"][1], size),
+                2: compute_tag_corners(self.april_tag_transforms["tag16h5"][2], size),
+                3: compute_tag_corners(self.april_tag_transforms["tag16h5"][3], size),
+                4: compute_tag_corners(self.april_tag_transforms["tag16h5"][4], size),
+                5: compute_tag_corners(self.april_tag_transforms["tag16h5"][5], size),
+                6: compute_tag_corners(self.april_tag_transforms["tag16h5"][6], size),
+                7: compute_tag_corners(self.april_tag_transforms["tag16h5"][7], size),
+                8: compute_tag_corners(self.april_tag_transforms["tag16h5"][8], size)
             }
         }
 
@@ -131,9 +131,13 @@ class RobotOutputProcessor:
                 ([-0.02, -(between_mounts / 2 + back_to_edge), 0],
                  R.from_euler("ZXY", [-154.39, 0, 0], degrees=True).as_matrix()))
         ]
-
-        self.camera_matrices = []
-        self.camera_dist_coeffs = []
+        # TODO: These are fake camera incntrics from chatgpt, we will need to replace them with our own.
+        K = np.array([[527.42, 0.0, 319.5],
+                      [0.0, 527.43, 239.5],
+                      [0.0, 0.0, 1.0]])
+        D = np.array([-0.205, 0.042, -0.003, -0.001, 0.0])
+        self.camera_matrices = [K, K, K, K]
+        self.camera_dist_coeffs = [D, D, D, D]
 
         self.transform_general_to_robot = np.zeros((4, 4))
         self.transform_general_to_robot[0:3, 0:3] = np.identity(3)
@@ -149,9 +153,12 @@ class RobotOutputProcessor:
         for (detections, cam_id, frame_timestamp) in inputs:
             if timestamp == -1:
                 timestamp = frame_timestamp
-            elif timestamp != frame_timestamp:
-                print("Mismatched timestamps!")
+            # elif timestamp != frame_timestamp:
+            #     # print("Mismatched timestamps!")\
+            #     pass
             quad_detections[cam_id] = detections
+
+        valid_tags = 0
 
         img_points = [[] for _ in range(4)]
         obj_points = [[] for _ in range(4)]
@@ -163,21 +170,28 @@ class RobotOutputProcessor:
                 if not valid_detection(family, tag_id):
                     print("NOT VALID" + str(detection))
                     continue
+                valid_tags += 1
 
-                for img_point, obj_point in zip(corners, self.april_tag_corners["16h5"][tag_id]):
+                for img_point, obj_point in zip(corners, self.april_tag_corners[family][tag_id]):
                     img_points[i].append(img_point)
                     obj_points[i].append(obj_point)
 
-        transform_general_to_world = multi_cam_pnp.calc(obj_points, img_points, self.camera_transforms,
-                                                        self.camera_matrices, self.camera_dist_coeffs)
-        transform_robot_to_world = transform_general_to_world @ linalg.inv(self.transform_general_to_robot)
+        if (valid_tags > 0):
 
-        NetworkTables.getEntry("/Jetson/pose/translation").setDoubleArray(list(transform_robot_to_world[0:3, 3]))
-        NetworkTables.getEntry("/Jetson/pose/rotation").setDoubleArray(
-            list(transform_robot_to_world[0:3, 0:3].reshape((1, 9))))
-        NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(timestamp)
-        NetworkTables.flush()
-        print(transform_robot_to_world)
+        
+            transform_general_to_world, _ = multi_cam_pnp.calc(obj_points, img_points, self.camera_transforms,
+                                                        self.camera_matrices, self.camera_dist_coeffs)
+            transform_robot_to_world = transform_general_to_world @ linalg.inv(self.transform_general_to_robot)
+
+            print(transform_general_to_world)
+            print(R.from_matrix(transform_robot_to_world[0:3, 0:3]).as_euler("ZYX", degrees=True))
+
+            NetworkTables.getEntry("/Jetson/pose/translation").setDoubleArray(list(transform_robot_to_world[0:3, 3]))
+            NetworkTables.getEntry("/Jetson/pose/rotation").setDoubleArray(
+                transform_robot_to_world[0:3, 0:3].reshape((9)).tolist())
+            NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(timestamp)
+            NetworkTables.flush()
+            print(transform_robot_to_world)
         # self.lock.acquire() for cam_id in self.quad_cam_ids: self.last_detection_corners[cam_id] = [detection[2]
         # for detection in detections[cam_id]] #Corners are the 3rd item in the tuple from tag detection pipeline.
         # self.lock.release()

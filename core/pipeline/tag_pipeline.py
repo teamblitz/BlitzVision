@@ -40,7 +40,7 @@ class ApriltagPipeline(VisionPipeline):
                                                                                 detection.center[1],
                                                                                 area_of_interest[0])
                             output.append(
-                                (detection.tag_id, detection.tag_family, translated_corners, translated_center,
+                                (detection.tag_id, detection.tag_family.decode(), translated_corners, translated_center,
                                  timestamp, cam_id))
 
                 outputs.append((output, cam_id, timestamp))

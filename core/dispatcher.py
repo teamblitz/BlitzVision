@@ -9,9 +9,9 @@ from threading import Event
 from queue import Queue
 
 
-def calculate_area_of_interest(cam_id: int, frame_size: Tuple[Any, Any]) -> Tuple[Tuple[int]]:
+def calculate_areas_of_interest(cam_id: int, frame_size: Tuple[Any, Any]) -> Tuple[Tuple[int]]:
     """Frame size in width, height notation"""
-    return frame_size
+    return (((0, 0), frame_size),)
 
 
 class Dispatcher:
@@ -33,7 +33,7 @@ class Dispatcher:
     def listener(self, pipeline_id, frames):
         if "tag" in self.cameraPipelines[pipeline_id].keys() and not self.cameraPipelines[pipeline_id]["tag"].is_busy():
             self.cameraPipelines[pipeline_id]["tag"].add_frames(
-                [(frame, timestamp, cam_id, calculate_area_of_interest(cam_id, (frame.size[1], frame.size[0]))) for
+                [(frame, timestamp, cam_id, calculate_areas_of_interest(cam_id, (frame.shape[1], frame.shape[0]))) for
                  frame, timestamp, cam_id in frames]
             )
 

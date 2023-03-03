@@ -35,12 +35,11 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
     line_origins = []
     object_points = []
     for i in range(0, 4):
-        print(img_points[i])
         if len(img_points[i]) > 1:
             undistorted_points = cv2.undistortPoints(np.asarray(img_points[i]), camera_matrices[i], dist_coeffs[i],
-                                                    R=cam_general_transforms[i][0:3, 0:3] @ np.array(([0, 0, 1],
-                                                                                                    [-1, 0, 0],
-                                                                                                    [0, -1, 0])))
+                                                     R=cam_general_transforms[i][0:3, 0:3] @ np.array(([0, 0, 1],
+                                                                                                       [-1, 0, 0],
+                                                                                                       [0, -1, 0])))
             for j in range(len(undistorted_points)):
                 # make the point a vector
                 point = np.empty(3)
@@ -55,9 +54,6 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
     line_versors_matrix = np.asarray(line_versors)
     line_origins_matrix = np.asarray(line_origins)
     object_points_matrix = np.asarray(object_points)
-    print(line_versors_matrix.shape)
-    print(line_origins_matrix.shape)
-    print(object_points_matrix.shape)
     return gPPnP(line_versors_matrix, line_origins_matrix, object_points_matrix,
                  tol=(0.0001 ** 2) * np.prod(object_points_matrix.shape))
 

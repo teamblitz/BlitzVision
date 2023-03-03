@@ -120,18 +120,18 @@ class RobotOutputProcessor:
         self.camera_transforms = [
             multi_cam_pnp.calc_cam_to_general_transform(
                 ([0.02, (between_mounts / 2 + front_to_edge), 0],
-                 R.from_euler("ZXY", [37.5, 0, 0], degrees=True).as_matrix())),
+                 R.from_euler("ZYX", [37.5, 0, 0], degrees=True).as_matrix())),
             multi_cam_pnp.calc_cam_to_general_transform(
                 ([-0.02, (between_mounts / 2 + front_to_edge), 0],
-                 R.from_euler("ZXY", [154.39, 0, 0], degrees=True).as_matrix())),
+                 R.from_euler("ZYX", [154.39, 0, 0], degrees=True).as_matrix())),
             multi_cam_pnp.calc_cam_to_general_transform(
                 ([0.02, -(between_mounts / 2 + front_to_edge), 0],
-                 R.from_euler("ZXY", [-37.5, 0, 0], degrees=True).as_matrix())),
+                 R.from_euler("ZYX", [-37.5, 0, 0], degrees=True).as_matrix())),
             multi_cam_pnp.calc_cam_to_general_transform(
                 ([-0.02, -(between_mounts / 2 + back_to_edge), 0],
-                 R.from_euler("ZXY", [-154.39, 0, 0], degrees=True).as_matrix()))
+                 R.from_euler("ZYX", [-154.39, 0, 0], degrees=True).as_matrix()))
         ]
-        # TODO: These are fake camera incntrics from chatgpt, we will need to replace them with our own.
+        # TODO: These are fake camera intrinsics from chatgpt, we will need to replace them with our own.
         K = np.array([[527.42, 0.0, 319.5],
                       [0.0, 527.43, 239.5],
                       [0.0, 0.0, 1.0]])
@@ -176,11 +176,9 @@ class RobotOutputProcessor:
                     img_points[i].append(img_point)
                     obj_points[i].append(obj_point)
 
-        if (valid_tags > 0):
-
-        
+        if valid_tags > 0:
             transform_general_to_world, _ = multi_cam_pnp.calc(obj_points, img_points, self.camera_transforms,
-                                                        self.camera_matrices, self.camera_dist_coeffs)
+                                                               self.camera_matrices, self.camera_dist_coeffs)
             transform_robot_to_world = transform_general_to_world @ linalg.inv(self.transform_general_to_robot)
 
             print(transform_general_to_world)
@@ -188,7 +186,7 @@ class RobotOutputProcessor:
 
             NetworkTables.getEntry("/Jetson/pose/translation").setDoubleArray(list(transform_robot_to_world[0:3, 3]))
             NetworkTables.getEntry("/Jetson/pose/rotation").setDoubleArray(
-                transform_robot_to_world[0:3, 0:3].reshape((9)).tolist())
+                transform_robot_to_world[0:3, 0:3].reshape(9).tolist())
             NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(timestamp)
             NetworkTables.flush()
             print(transform_robot_to_world)

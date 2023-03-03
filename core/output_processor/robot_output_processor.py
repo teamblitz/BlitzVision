@@ -56,36 +56,36 @@ class RobotOutputProcessor:
                 1: compute_tag_transform([units.inches_to_meters(610.77),
                                           units.inches_to_meters(42.19),
                                           units.inches_to_meters(18.22)],
-                                         R.from_euler("Z", np.pi).as_matrix()),
+                                         np.identity(3)),
                 2: compute_tag_transform([units.inches_to_meters(610.77),
                                           units.inches_to_meters(108.19),
                                           units.inches_to_meters(18.22)],
-                                         R.from_euler("Z", np.pi).as_matrix()),
+                                         np.identity(3)),
                 3: compute_tag_transform([units.inches_to_meters(610.77),
                                           units.inches_to_meters(174.19),  # FIRST's diagram has a typo (it says 147.19)
                                           units.inches_to_meters(18.22)],
-                                         R.from_euler("Z", np.pi).as_matrix()),
+                                         np.identity(3)),
                 4: compute_tag_transform([units.inches_to_meters(636.96),
                                           units.inches_to_meters(265.74),
                                           units.inches_to_meters(27.38)],
-                                         R.from_euler("Z", np.pi).as_matrix()),
+                                         np.identity(3)),
                 # Blue side of the field
                 5: compute_tag_transform([units.inches_to_meters(14.25),
                                           units.inches_to_meters(265.74),
                                           units.inches_to_meters(27.38)],
-                                         np.identity(3)),
+                                         R.from_euler("Z", np.pi).as_matrix()),
                 6: compute_tag_transform([units.inches_to_meters(40.45),
                                           units.inches_to_meters(174.19),  # FIRST's diagram has a typo (it says 147.19)
                                           units.inches_to_meters(18.22)],
-                                         np.identity(3)),
+                                         R.from_euler("Z", np.pi).as_matrix()),
                 7: compute_tag_transform([units.inches_to_meters(40.45),
                                           units.inches_to_meters(108.19),
                                           units.inches_to_meters(18.22)],
-                                         np.identity(3)),
+                                         R.from_euler("Z", np.pi).as_matrix()),
                 8: compute_tag_transform([units.inches_to_meters(40.45),
                                           units.inches_to_meters(42.19),
                                           units.inches_to_meters(18.22)],
-                                         np.identity(3))
+                                         R.from_euler("Z", np.pi).as_matrix())
             }
         }
         # The coordinates of the corners for all apriltags in order

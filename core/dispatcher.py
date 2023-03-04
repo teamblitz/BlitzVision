@@ -19,8 +19,8 @@ class Dispatcher:
     def __init__(self):
         self.quadCamera = QuadCameraReader((lambda x: self.listener(0, x)))
         self.quadCamera.start()
-        self.vop = VisualOutputProcessor()
         self.rop = RobotOutputProcessor(4)
+        self.vop = VisualOutputProcessor(self.rop)
 
         self.cameraPipelines: List[Dict[str, VisionPipeline]] = [
             {

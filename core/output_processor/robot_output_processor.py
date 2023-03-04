@@ -182,7 +182,7 @@ class RobotOutputProcessor:
             transform_robot_to_world = transform_general_to_world @ linalg.inv(self.transform_general_to_robot)
 
             print(transform_general_to_world)
-            print(R.from_matrix(transform_robot_to_world[0:3, 0:3]).as_euler("ZYX", degrees=True))
+            print(R.from_matrix(transform_general_to_world[0:3, 0:3]).as_euler("ZYX", degrees=True))
 
             NetworkTables.getEntry("/Jetson/pose/translation").setDoubleArray(list(transform_robot_to_world[0:3, 3]))
             NetworkTables.getEntry("/Jetson/pose/rotation").setDoubleArray(

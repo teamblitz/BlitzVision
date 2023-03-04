@@ -26,7 +26,7 @@ class ApriltagPipeline(VisionPipeline):
                 frame, timestamp, cam_id, areas_of_interest = cam_in
 
                 output = []
-
+                self.visual_output_processor.clear_tag_detections(cam_id)
                 # Area of interest is a tuple ((x1,y1),(x2,y2))
                 for area_of_interest in areas_of_interest:
                     (x1, y1), (x2, y2) = area_of_interest
@@ -44,6 +44,8 @@ class ApriltagPipeline(VisionPipeline):
                                  timestamp, cam_id))
 
                 outputs.append((output, cam_id, timestamp))
+
+                self.visual_output_processor.add_tag_detections(cam_id, output)
 
             if len(outputs) == 4:
                 self.robot_output_processor.process_quad_cam(outputs)

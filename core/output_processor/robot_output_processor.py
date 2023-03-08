@@ -132,10 +132,10 @@ class RobotOutputProcessor:
                  R.from_euler("ZYX", [-154.39, 0, 0], degrees=True).as_matrix()))
         ]
         # TODO: These are fake camera intrinsics from chatgpt, we will need to replace them with our own.
-        K = np.array([[527.42, 0.0, 319.5],
-                      [0.0, 527.43, 239.5],
+        K = np.array([[834.064, 0.0, 640],
+                      [0.0, 834.064, 400],
                       [0.0, 0.0, 1.0]])
-        D = np.array([-0.205, 0.042, -0.003, -0.001, 0.0])
+        D = np.array([0., 0., 0., 0., 0.])
         self.camera_matrices = [K, K, K, K]
         self.camera_dist_coeffs = [D, D, D, D]
 

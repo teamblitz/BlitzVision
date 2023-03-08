@@ -3,11 +3,12 @@ from camera_calibration import CameraCalibration
 from queue import Queue
 import cv2
 
-
 frames_queue = Queue()
+
 
 def listener(frames):
     frames_queue.put(frames)
+
 
 def main():
     reader: QuadCameraReader = QuadCameraReader(listener)
@@ -16,7 +17,7 @@ def main():
     calibrators = [CameraCalibration(10, 10) for _ in range(0, 4)]
 
     while True:
-        frames = [None for _ in range(0,4)]
+        frames = [None for _ in range(0, 4)]
         for (frame, timestamp, cam_id) in frames_queue.get():
             cv2.imshow(cam_id, calibrators[cam_id].show_pattern(frame))
             frames[cam_id] = frame
@@ -34,15 +35,14 @@ def main():
         if key == ord("3"):
             to_calib = 3
 
-
         if to_calib == -1:
             continue
 
         ret = calibrators[to_calib].add_to_calibration(frames[to_calib])
 
-        print(f"{'Successfully added' if ret else 'Failed to add'} calibration frame for cam {to_calib}")
+        print(
+            f"{'Successfully added' if ret else 'Failed to add'} calibration frame for cam {to_calib}\n Count:{calibrators[to_calib].get_frame_count()}")
 
         if key == ord("c"):
             for i in range(0, 4):
                 calibrators[i].finish_calibration()
-

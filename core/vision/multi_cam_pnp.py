@@ -31,6 +31,7 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
             homogeneous matrix Tgw transformation form the general camera frame to the world camera frame.
             int of iterations taken to find the pose
     """
+    print(img_points)
     line_versors = []
     line_origins = []
     object_points = []
@@ -54,6 +55,16 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
     line_versors_matrix = np.asarray(line_versors)
     line_origins_matrix = np.asarray(line_origins)
     object_points_matrix = np.asarray(object_points)
+
+    print("Line_versors")
+    print(line_versors_matrix)
+
+    print("Line origins")
+    print(line_origins_matrix)
+
+    print("Object points")
+    print(object_points_matrix)
+    
     return gPPnP(line_versors_matrix, line_origins_matrix, object_points_matrix,
                  tol=(0.0001 ** 2) * np.prod(object_points_matrix.shape))
 

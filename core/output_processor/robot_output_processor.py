@@ -108,10 +108,10 @@ class RobotOutputProcessor:
         }
 
         # The cameras are numbered 0 to 3.
-        # 0 is front right
-        # 1 is back right
-        # 2 is front left
-        # 3 is back left
+        # 0 is front left
+        # 1 is back left
+        # 2 is front right
+        # 3 is back right
         # units=meters
         between_mounts = units.inches_to_meters(12)
         front_to_edge = units.millimeters_to_meters(19.77)
@@ -181,15 +181,22 @@ class RobotOutputProcessor:
                                                                self.camera_matrices, self.camera_dist_coeffs)
             transform_robot_to_world = transform_general_to_world @ linalg.inv(self.transform_general_to_robot)
 
-            print(transform_general_to_world)
-            print(R.from_matrix(transform_general_to_world[0:3, 0:3]).as_euler("ZYX", degrees=True))
 
             NetworkTables.getEntry("/Jetson/pose/translation").setDoubleArray(list(transform_robot_to_world[0:3, 3]))
             NetworkTables.getEntry("/Jetson/pose/rotation").setDoubleArray(
                 transform_robot_to_world[0:3, 0:3].reshape(9).tolist())
             NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(timestamp)
             NetworkTables.flush()
+
+            print("General To World")
+            print(transform_general_to_world)
+
+            print("Rotation")
+            print(R.from_matrix(transform_robot_to_world[0:3, 0:3]).as_euler("ZXY", degrees=True))
+
+            print("Robot To World")
             print(transform_robot_to_world)
+
         # self.lock.acquire() for cam_id in self.quad_cam_ids: self.last_detection_corners[cam_id] = [detection[2]
         # for detection in detections[cam_id]] #Corners are the 3rd item in the tuple from tag detection pipeline.
         # self.lock.release()

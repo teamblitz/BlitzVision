@@ -37,17 +37,23 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
     object_points = []
     for i in range(0, 4):
         if len(img_points[i]) > 1:
-            undistorted_points = cv2.undistortPoints(np.asarray(img_points[i]), camera_matrices[i], dist_coeffs[i],
-                                                     R=cam_general_transforms[i][0:3, 0:3] @ np.array(([0, 0, 1],
-                                                                                                       [-1, 0, 0],
-                                                                                                       [0, -1, 0])))
+            undistorted_points = cv2.undistortPoints(np.asarray(img_points[i]), camera_matrices[i], dist_coeffs[i])
             for j in range(len(undistorted_points)):
                 # make the point a vector
                 point = np.empty(3)
-                point[:2] = undistorted_points[j]
+                point[:2] = undistorted_points[j] + [1280 / 2, 800, 2]
                 point[2] = 1
+                print("Undistorted Point")
+                print(point)
                 # normalize it to be a unit vector
                 line_versors.append(point * (1 / linalg.norm(point)))
+
+                # orient and rotate axes
+                point = cam_general_transforms[i][0:3, 0:3] @ (np.array(([0, 0, 1],
+                                                                         [-1, 0, 0],
+                                                                         [0, -1, 0])) @ point)
+                print("Rotated Point")
+                print(point)
                 # pull out the origin
                 line_origins.append(cam_general_transforms[i][0:3, 3])
                 # add the object points

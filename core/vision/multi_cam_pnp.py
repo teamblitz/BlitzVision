@@ -41,19 +41,28 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
             for j in range(len(undistorted_points)):
                 # make the point a vector
                 point = np.empty(3)
-                point[:2] = undistorted_points[j] + [1280 / 2, 800, 2]
+                # print("Undistorted Point")
+                # print(undistorted_points[j])
+                point[:2] = undistorted_points[j] # - [1280 / 2, 800 / 2]
                 point[2] = 1
-                print("Undistorted Point")
-                print(point)
-                # normalize it to be a unit vector
-                line_versors.append(point * (1 / linalg.norm(point)))
+                
+                # print("Shifted Point")
+                # print(point)
+                
+                point = point * (1 / linalg.norm(point))
+                # print("Normalized vector")
+                # print(point)
 
                 # orient and rotate axes
                 point = cam_general_transforms[i][0:3, 0:3] @ (np.array(([0, 0, 1],
                                                                          [-1, 0, 0],
                                                                          [0, -1, 0])) @ point)
-                print("Rotated Point")
-                print(point)
+                
+                # print("Rotated Point")
+                # print(point)
+                # normalize it to be a unit vector
+                line_versors.append(point)
+
                 # pull out the origin
                 line_origins.append(cam_general_transforms[i][0:3, 3])
                 # add the object points
@@ -62,14 +71,14 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
     line_origins_matrix = np.asarray(line_origins)
     object_points_matrix = np.asarray(object_points)
 
-    print("Line_versors")
-    print(line_versors_matrix)
+    # print("Line_versors")
+    # print(line_versors_matrix)
 
-    print("Line origins")
-    print(line_origins_matrix)
+    # print("Line origins")
+    # print(line_origins_matrix)
 
-    print("Object points")
-    print(object_points_matrix)
+    # print("Object points")
+    # print(object_points_matrix)
     
     return gPPnP(line_versors_matrix, line_origins_matrix, object_points_matrix,
                  tol=(0.0001 ** 2) * np.prod(object_points_matrix.shape))

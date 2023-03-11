@@ -22,7 +22,7 @@ class CameraCalibration:
 
         # Prepare the object points: (0,0,0), (1,0,0), (2,0,0), ..., (6,5,0). They are the same for all images
         self.objectPoints = np.zeros((rows * columns, 3), np.float32)
-        self.objectPoints[:, :2] = np.mgrid[0:rows, 0:columns].T.reshape(-1, 2) * 21.757
+        self.objectPoints[:, :2] = np.mgrid[0:rows, 0:columns].T.reshape(-1, 2) * 0.025
 
     def show_pattern(self, img):
         '''Draw calibration grid on the image and return true if detected.'''

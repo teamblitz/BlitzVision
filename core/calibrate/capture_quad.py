@@ -70,7 +70,7 @@ def main():
         if (key == ord("s")):
             for i, images in enumerate(captured_frames):
                 for j, img in enumerate(images):
-                    name = f"calibration/images/{str(i)}/img_{str(j)}_{time.monotonic_ns()}.jpg"
+                    name = f"calibration/tag/{str(i)}/img_{str(j)}_{time.monotonic_ns()}.jpg"
                     # name = f"test_{i}_{j}.jpg"
                     print(name)
                     print(cv2.imwrite(name, img))

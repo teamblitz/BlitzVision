@@ -3,16 +3,26 @@ import numpy as np
 from quad_camera_reader import QuadCameraReader
 from camera_calibration import CameraCalibration
 from queue import Queue
+from threading import Lock
 import cv2
 
 frames_queue = Queue()
 
+lock = Lock()
+
+busy = False
 
 def listener(frames):
-    frames_queue.put(frames)
+    global busy
+    if not busy:
+        while not frames_queue.empty():
+            frames_queue.get()
+        frames_queue.put(frames)
+        busy = True
 
 
 def main():
+
     reader: QuadCameraReader = QuadCameraReader(listener)
     reader.start()
 
@@ -60,6 +70,7 @@ def main():
         print(
             f"{'Successfully added' if ret else 'Failed to add'} calibration frame for cam {to_calib}\n Count:{calibrators[to_calib].get_frame_count()}")
 
-
+        global busy
+        busy = False
 
 

@@ -1,12 +1,12 @@
 import numpy as np
 
 from quad_camera_reader import QuadCameraReader
-from camera_calibration import CameraCalibration
+from vision.camera_calibration import CameraCalibration
 from queue import Queue
 from threading import Lock
 import cv2
 
-frames_queue = Queue()
+frames_queue = Queue(1)
 
 lock = Lock()
 
@@ -20,6 +20,12 @@ def listener(frames):
         frames_queue.put(frames)
         busy = True
 
+def resize(frame, dst_width):
+    width = frame.shape[1]
+    height = frame.shape[0]
+    scale = dst_width * 1.0 / width
+    return cv2.resize(frame, (int(scale * width), int(scale * height)))
+
 
 def main():
 
@@ -29,10 +35,21 @@ def main():
     calibrators = [CameraCalibration(7, 10) for _ in range(0, 4)]
 
     while True:
+        print("hI")
+        print(frames_queue.qsize())
         frames = [None for _ in range(0, 4)]
         for (frame, timestamp, cam_id) in frames_queue.get():
-            cv2.imshow(cam_id, calibrators[cam_id].show_pattern(frame))
+            cv2.imshow(str(cam_id), resize(calibrators[cam_id].show_pattern(frame)[1], 640))
             frames[cam_id] = frame
+        
+        print(frames_queue.qsize())
+        global busy
+        busy = False
+
+        continue
+
+        to_calib = -1
+        key = cv2.waitKey(1)
 
         if key == ord("c"):
             camraMatrices = []
@@ -49,8 +66,6 @@ def main():
 
             break
 
-        to_calib = -1
-        key = cv2.waitKey(1)
         if key == ord("q"):
             break
         if key == ord("0"):
@@ -70,7 +85,9 @@ def main():
         print(
             f"{'Successfully added' if ret else 'Failed to add'} calibration frame for cam {to_calib}\n Count:{calibrators[to_calib].get_frame_count()}")
 
-        global busy
-        busy = False
+        # global busy
+        # busy = False
 
 
+if __name__ == "__main__":
+    main()

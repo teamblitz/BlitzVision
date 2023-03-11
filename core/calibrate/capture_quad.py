@@ -1,5 +1,14 @@
 import numpy as np
+import sys
+import os
+import time
 
+# print(
+#     os.path.abspath(
+#         os.path.dirname(os.path.dirname((os.path.dirname(__file__)))
+#     )
+# )
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from quad_camera_reader import QuadCameraReader
 from vision.camera_calibration import CameraCalibration
 from queue import Queue
@@ -42,6 +51,10 @@ def main():
             frames[cam_id] = frame
 
         key = cv2.waitKey(1)
+        to_capture = -1
+
+        global busy
+        busy = False
 
         if key == ord("q"):
             break
@@ -57,9 +70,11 @@ def main():
         if (key == ord("s")):
             for i, images in enumerate(captured_frames):
                 for j, img in enumerate(images):
-                    cv2.imwrite(f"calibration\\images\\{str(i)}\\img_{str(j)}.jpg")
+                    name = f"calibration/images/{str(i)}/img_{str(j)}_{time.monotonic_ns()}.jpg"
+                    # name = f"test_{i}_{j}.jpg"
+                    print(name)
+                    print(cv2.imwrite(name, img))
             print("saved")
-            break
 
         if to_capture == -1:
             continue
@@ -68,9 +83,9 @@ def main():
 
         print(
             f"Successfully added calibration frame for cam {to_capture}\n Count:{len(captured_frames[to_capture])}")
+        
+    cv2.destroyAllWindows()
 
-        global busy
-        busy = False
 
 
 if __name__ == "__main__":

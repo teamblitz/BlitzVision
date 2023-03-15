@@ -8,9 +8,8 @@ import time
 #         os.path.dirname(os.path.dirname((os.path.dirname(__file__)))
 #     )
 # )
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from quad_camera_reader import QuadCameraReader
-from vision.camera_calibration import CameraCalibration
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from core.quad_camera_reader import QuadCameraReader
 from queue import Queue
 from threading import Lock
 import cv2

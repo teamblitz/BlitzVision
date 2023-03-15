@@ -10,7 +10,7 @@ from networktables import NetworkTables
 import utils.units as units
 import vision.multi_cam_pnp as multi_cam_pnp
 
-valid_ids = {"tag16h5": (1, 2, 3, 4, 5, 6, 7, 8), "tag25h9": (1, 2)}
+valid_ids = {"tag16h5": (0, 1, 2, 3, 4, 5, 6, 7, 8), "tag25h9": (1, 2)}
 valid_families = valid_ids.keys()
 
 
@@ -52,6 +52,8 @@ class RobotOutputProcessor:
         # Defined constants
         self.april_tag_transforms = {
             "tag16h5": {
+                # Origin tag
+                0: compute_tag_transform([0, 0, 0], np.identity(3)),
                 # Red side of the field
                 1: compute_tag_transform([units.inches_to_meters(610.77),
                                           units.inches_to_meters(42.19),
@@ -96,6 +98,7 @@ class RobotOutputProcessor:
         size = units.inches_to_meters(6)
         self.april_tag_corners = {
             "tag16h5": {
+                0: compute_tag_corners(self.april_tag_transforms["tag16h5"][0], size),
                 1: compute_tag_corners(self.april_tag_transforms["tag16h5"][1], size),
                 2: compute_tag_corners(self.april_tag_transforms["tag16h5"][2], size),
                 3: compute_tag_corners(self.april_tag_transforms["tag16h5"][3], size),
@@ -121,6 +124,9 @@ class RobotOutputProcessor:
             multi_cam_pnp.calc_cam_to_general_transform(
                 ([0.02, (between_mounts / 2 + front_to_edge), 0],
                  R.from_euler("ZYX", [37.5, 0, 0], degrees=True).as_matrix())),
+            # multi_cam_pnp.calc_cam_to_general_transform(
+            #     ([0, 0, 0],
+            #      R.from_euler("ZYX", [0, 0, 0], degrees=True).as_matrix())),
             multi_cam_pnp.calc_cam_to_general_transform(
                 ([-0.02, (between_mounts / 2 + front_to_edge), 0],
                  R.from_euler("ZYX", [154.39, 0, 0], degrees=True).as_matrix())),
@@ -131,11 +137,6 @@ class RobotOutputProcessor:
                 ([-0.02, -(between_mounts / 2 + back_to_edge), 0],
                  R.from_euler("ZYX", [-154.39, 0, 0], degrees=True).as_matrix()))
         ]
-        K = np.array([[834.064, 0.0, 640],
-                      [0.0, 834.064, 400],
-                      [0.0, 0.0, 1.0]])
-        D = np.array([0., 0., 0., 0., 0.])
-
         self.camera_matrices = []
         self.camera_dist_coeffs = []
 
@@ -153,6 +154,7 @@ class RobotOutputProcessor:
         self.lock = Lock()
 
     def process_quad_cam(self, inputs):
+        print(inputs)
         timestamp = -1
         quad_detections: Iterable[Iterable[Any] | None] = [None for _ in range(4)]
         # Quad cam cam ids are 0 - 3
@@ -170,6 +172,7 @@ class RobotOutputProcessor:
         obj_points = [[] for _ in range(4)]
 
         for i in range(0, 4):
+            print(i)
             for detection in quad_detections[i]:
                 tag_id, family, corners, center, _, cam_id = detection
 

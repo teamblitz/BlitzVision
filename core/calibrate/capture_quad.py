@@ -83,9 +83,8 @@ def main():
 
         print(
             f"Successfully added calibration frame for cam {to_capture}\n Count:{len(captured_frames[to_capture])}")
-        
-    cv2.destroyAllWindows()
 
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

@@ -131,13 +131,19 @@ class RobotOutputProcessor:
                 ([-0.02, -(between_mounts / 2 + back_to_edge), 0],
                  R.from_euler("ZYX", [-154.39, 0, 0], degrees=True).as_matrix()))
         ]
-        # TODO: These are fake camera intrinsics from chatgpt, we will need to replace them with our own.
         K = np.array([[834.064, 0.0, 640],
                       [0.0, 834.064, 400],
                       [0.0, 0.0, 1.0]])
         D = np.array([0., 0., 0., 0., 0.])
-        self.camera_matrices = [K, K, K, K]
-        self.camera_dist_coeffs = [D, D, D, D]
+
+        self.camera_matrices = []
+        self.camera_dist_coeffs = []
+
+        for i in range(4):
+            file = np.load(f"calibration/store/{i}.npz")
+            self.camera_matrices.append(file["cameraMatrix"])
+            self.camera_dist_coeffs.append(file["distCoeffs"])
+
 
         self.transform_general_to_robot = np.zeros((4, 4))
         self.transform_general_to_robot[0:3, 0:3] = np.identity(3)

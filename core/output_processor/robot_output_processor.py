@@ -170,6 +170,7 @@ class RobotOutputProcessor:
                 if not valid_detection(family, tag_id):
                     print("NOT VALID" + str(detection))
                     continue
+                print(detection)
                 valid_tags += 1
 
                 for img_point, obj_point in zip(corners, self.april_tag_corners[family][tag_id]):

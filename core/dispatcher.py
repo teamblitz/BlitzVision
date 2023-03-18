@@ -2,6 +2,7 @@ from output_processor.robot_output_processor import RobotOutputProcessor
 from pipeline.tag_pipeline import ApriltagPipeline
 from pipeline.vision_pipeline import VisionPipeline
 from quad_camera_reader import QuadCameraReader
+from robot_communicator import RobotCommunicator
 from output_processor.visual_output_processor import VisualOutputProcessor
 
 from typing import List, Dict, Any, Union, Tuple
@@ -17,6 +18,10 @@ def calculate_areas_of_interest(cam_id: int, frame_size: Tuple[Any, Any]) -> Tup
 class Dispatcher:
 
     def __init__(self):
+
+        rc = RobotCommunicator()
+        rc.start()
+
         self.quadCamera = QuadCameraReader((lambda x: self.listener(0, x)))
         self.quadCamera.start()
         self.rop = RobotOutputProcessor(4)

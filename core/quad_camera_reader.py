@@ -59,10 +59,10 @@ class QuadCameraReader(CameraReader):
             step = int(width / 4)
 
             frames = [
-                (frame[0:height, step * 0: step * 1, :].copy(), time_manager.get_instance().get_timestamp(), 0),
-                (frame[0:height, step * 1: step * 2, :].copy(), time_manager.get_instance().get_timestamp(), 1),
-                (frame[0:height, step * 2: step * 3, :].copy(), time_manager.get_instance().get_timestamp(), 2),
-                (frame[0:height, step * 3: step * 4, :].copy(), time_manager.get_instance().get_timestamp(), 3)
+                (frame[0:height, step * 0: step * 1, :].copy(), time.perf_counter_ns(), 0),
+                (frame[0:height, step * 1: step * 2, :].copy(), time.perf_counter_ns(), 1),
+                (frame[0:height, step * 2: step * 3, :].copy(), time.perf_counter_ns(), 2),
+                (frame[0:height, step * 3: step * 4, :].copy(), time.perf_counter_ns(), 3)
             ]
 
             self.listener(frames)

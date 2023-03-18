@@ -1,3 +1,4 @@
+import time
 from threading import Lock
 from typing import Iterable, Any
 
@@ -9,6 +10,8 @@ from networktables import NetworkTables
 
 import utils.units as units
 import vision.multi_cam_pnp as multi_cam_pnp
+
+import time_manager
 
 valid_ids = {"tag16h5": (0, 1, 2, 3, 4, 5, 6, 7, 8), "tag25h9": (1, 2)}
 valid_families = valid_ids.keys()
@@ -195,7 +198,9 @@ class RobotOutputProcessor:
             NetworkTables.getEntry("/Jetson/pose/translation").setDoubleArray(list(transform_robot_to_world[0:3, 3]))
             NetworkTables.getEntry("/Jetson/pose/rotation").setDoubleArray(
                 transform_robot_to_world[0:3, 0:3].reshape(9).tolist())
-            NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(timestamp)
+
+            NetworkTables.getEntry("/Jetson/pose/delay").setDouble(time.perf_counter_ns() - timestamp)
+            NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(time_manager.get_instance().get_timestamp(pref_count=timestamp))
             NetworkTables.flush()
 
             print("General To World")

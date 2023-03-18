@@ -36,15 +36,18 @@ class Dispatcher:
         self.cameraPipelines[0]["tag"].start()
 
     def listener(self, pipeline_id, frames):
-        if "tag" in self.cameraPipelines[pipeline_id].keys() and not self.cameraPipelines[pipeline_id]["tag"].is_busy():
-            self.cameraPipelines[pipeline_id]["tag"].add_frames(
-                [(frame, timestamp, cam_id, calculate_areas_of_interest(cam_id, (frame.shape[1], frame.shape[0]))) for
-                 frame, timestamp, cam_id in frames]
-            )
+        if hasattr(self, "cameraPipelines"):
+            if "tag" in self.cameraPipelines[pipeline_id].keys() and not self.cameraPipelines[pipeline_id]["tag"].is_busy():
+                self.cameraPipelines[pipeline_id]["tag"].add_frames(
+                    [(frame, timestamp, cam_id, calculate_areas_of_interest(cam_id, (frame.shape[1], frame.shape[0]))) for
+                    frame, timestamp, cam_id in frames]
+                )
 
-        for frame in frames:
-            frame, _, cam_id = frame
-            self.vop.display_frame(frame, cam_id)
+            for frame in frames:
+                frame, _, cam_id = frame
+                self.vop.display_frame(frame, cam_id)
+        else:
+            print("cameraPipelines does not exist.")
 
 
 if __name__ == "__main__":

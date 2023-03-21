@@ -1,3 +1,4 @@
+import time
 from threading import Lock
 from typing import Iterable, Any
 
@@ -10,7 +11,9 @@ from networktables import NetworkTables
 import utils.units as units
 import vision.multi_cam_pnp as multi_cam_pnp
 
-valid_ids = {"tag16h5": (1, 2, 3, 4, 5, 6, 7, 8), "tag25h9": (1, 2)}
+import time_manager
+
+valid_ids = {"tag16h5": (0, 1, 2, 3, 4, 5, 6, 7, 8), "tag25h9": (1, 2)}
 valid_families = valid_ids.keys()
 
 
@@ -52,6 +55,8 @@ class RobotOutputProcessor:
         # Defined constants
         self.april_tag_transforms = {
             "tag16h5": {
+                # Origin tag
+                0: compute_tag_transform([0, 0, 0], np.identity(3)),
                 # Red side of the field
                 1: compute_tag_transform([units.inches_to_meters(610.77),
                                           units.inches_to_meters(42.19),
@@ -96,6 +101,7 @@ class RobotOutputProcessor:
         size = units.inches_to_meters(6)
         self.april_tag_corners = {
             "tag16h5": {
+                0: compute_tag_corners(self.april_tag_transforms["tag16h5"][0], size),
                 1: compute_tag_corners(self.april_tag_transforms["tag16h5"][1], size),
                 2: compute_tag_corners(self.april_tag_transforms["tag16h5"][2], size),
                 3: compute_tag_corners(self.april_tag_transforms["tag16h5"][3], size),
@@ -121,6 +127,9 @@ class RobotOutputProcessor:
             multi_cam_pnp.calc_cam_to_general_transform(
                 ([0.02, (between_mounts / 2 + front_to_edge), 0],
                  R.from_euler("ZYX", [37.5, 0, 0], degrees=True).as_matrix())),
+            # multi_cam_pnp.calc_cam_to_general_transform(
+            #     ([0, 0, 0],
+            #      R.from_euler("ZYX", [0, 0, 0], degrees=True).as_matrix())),
             multi_cam_pnp.calc_cam_to_general_transform(
                 ([-0.02, (between_mounts / 2 + front_to_edge), 0],
                  R.from_euler("ZYX", [154.39, 0, 0], degrees=True).as_matrix())),
@@ -131,13 +140,14 @@ class RobotOutputProcessor:
                 ([-0.02, -(between_mounts / 2 + back_to_edge), 0],
                  R.from_euler("ZYX", [-154.39, 0, 0], degrees=True).as_matrix()))
         ]
-        # TODO: These are fake camera intrinsics from chatgpt, we will need to replace them with our own.
-        K = np.array([[834.064, 0.0, 640],
-                      [0.0, 834.064, 400],
-                      [0.0, 0.0, 1.0]])
-        D = np.array([0., 0., 0., 0., 0.])
-        self.camera_matrices = [K, K, K, K]
-        self.camera_dist_coeffs = [D, D, D, D]
+        self.camera_matrices = []
+        self.camera_dist_coeffs = []
+
+        for i in range(4):
+            file = np.load(f"calibration/store/{i}.npz")
+            self.camera_matrices.append(file["cameraMatrix"])
+            self.camera_dist_coeffs.append(file["distCoeffs"])
+
 
         self.transform_general_to_robot = np.zeros((4, 4))
         self.transform_general_to_robot[0:3, 0:3] = np.identity(3)
@@ -147,6 +157,7 @@ class RobotOutputProcessor:
         self.lock = Lock()
 
     def process_quad_cam(self, inputs):
+        # print(inputs)
         timestamp = -1
         quad_detections: Iterable[Iterable[Any] | None] = [None for _ in range(4)]
         # Quad cam cam ids are 0 - 3
@@ -170,6 +181,7 @@ class RobotOutputProcessor:
                 if not valid_detection(family, tag_id):
                     print("NOT VALID" + str(detection))
                     continue
+                # print(detection)
                 valid_tags += 1
 
                 for img_point, obj_point in zip(corners, self.april_tag_corners[family][tag_id]):
@@ -177,25 +189,29 @@ class RobotOutputProcessor:
                     obj_points[i].append(obj_point)
 
         if valid_tags > 0:
+            # pretime = time.perf_counter()
             transform_general_to_world, _ = multi_cam_pnp.calc(obj_points, img_points, self.camera_transforms,
                                                                self.camera_matrices, self.camera_dist_coeffs)
+            # print(time.perf_counter() - pretime)
             transform_robot_to_world = transform_general_to_world @ linalg.inv(self.transform_general_to_robot)
 
 
             NetworkTables.getEntry("/Jetson/pose/translation").setDoubleArray(list(transform_robot_to_world[0:3, 3]))
             NetworkTables.getEntry("/Jetson/pose/rotation").setDoubleArray(
                 transform_robot_to_world[0:3, 0:3].reshape(9).tolist())
-            NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(timestamp)
+
+            NetworkTables.getEntry("/Jetson/pose/delay").setDouble(time.perf_counter_ns() - timestamp)
+            NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(time_manager.get_instance().get_timestamp(pref_count=timestamp))
             NetworkTables.flush()
 
-            print("General To World")
-            print(transform_general_to_world)
+            # print("General To World")
+            # print(transform_general_to_world)
 
-            print("Rotation")
-            print(R.from_matrix(transform_robot_to_world[0:3, 0:3]).as_euler("ZXY", degrees=True))
+            # print("Rotation")
+            # print(R.from_matrix(transform_robot_to_world[0:3, 0:3]).as_euler("ZXY", degrees=True))
 
-            print("Robot To World")
-            print(transform_robot_to_world)
+            # print("Robot To World")
+            # print(transform_robot_to_world)
 
         # self.lock.acquire() for cam_id in self.quad_cam_ids: self.last_detection_corners[cam_id] = [detection[2]
         # for detection in detections[cam_id]] #Corners are the 3rd item in the tuple from tag detection pipeline.

@@ -31,7 +31,7 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
             homogeneous matrix Tgw transformation form the general camera frame to the world camera frame.
             int of iterations taken to find the pose
     """
-    print(img_points)
+    # print(img_points)
     line_versors = []
     line_origins = []
     object_points = []

@@ -26,7 +26,7 @@ class ApriltagDetector:
     def __init__(self):
         pass
 
-    def detect(self, colorFrame: cv2.Mat):
+    def detect(self, colorFrame):
         frame: cv2.Mat = cv2.cvtColor(colorFrame, cv2.COLOR_BGR2GRAY)
         result: list[pupil_apriltags.Detection] = self.detector.detect(frame)
         return result

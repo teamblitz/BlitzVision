@@ -157,7 +157,7 @@ class RobotOutputProcessor:
         self.lock = Lock()
 
     def process_quad_cam(self, inputs):
-        print(inputs)
+        # print(inputs)
         timestamp = -1
         quad_detections: Iterable[Iterable[Any] | None] = [None for _ in range(4)]
         # Quad cam cam ids are 0 - 3
@@ -175,14 +175,13 @@ class RobotOutputProcessor:
         obj_points = [[] for _ in range(4)]
 
         for i in range(0, 4):
-            print(i)
             for detection in quad_detections[i]:
                 tag_id, family, corners, center, _, cam_id = detection
 
                 if not valid_detection(family, tag_id):
                     print("NOT VALID" + str(detection))
                     continue
-                print(detection)
+                # print(detection)
                 valid_tags += 1
 
                 for img_point, obj_point in zip(corners, self.april_tag_corners[family][tag_id]):
@@ -190,8 +189,10 @@ class RobotOutputProcessor:
                     obj_points[i].append(obj_point)
 
         if valid_tags > 0:
+            # pretime = time.perf_counter()
             transform_general_to_world, _ = multi_cam_pnp.calc(obj_points, img_points, self.camera_transforms,
                                                                self.camera_matrices, self.camera_dist_coeffs)
+            # print(time.perf_counter() - pretime)
             transform_robot_to_world = transform_general_to_world @ linalg.inv(self.transform_general_to_robot)
 
 
@@ -203,14 +204,14 @@ class RobotOutputProcessor:
             NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(time_manager.get_instance().get_timestamp(pref_count=timestamp))
             NetworkTables.flush()
 
-            print("General To World")
-            print(transform_general_to_world)
+            # print("General To World")
+            # print(transform_general_to_world)
 
-            print("Rotation")
-            print(R.from_matrix(transform_robot_to_world[0:3, 0:3]).as_euler("ZXY", degrees=True))
+            # print("Rotation")
+            # print(R.from_matrix(transform_robot_to_world[0:3, 0:3]).as_euler("ZXY", degrees=True))
 
-            print("Robot To World")
-            print(transform_robot_to_world)
+            # print("Robot To World")
+            # print(transform_robot_to_world)
 
         # self.lock.acquire() for cam_id in self.quad_cam_ids: self.last_detection_corners[cam_id] = [detection[2]
         # for detection in detections[cam_id]] #Corners are the 3rd item in the tuple from tag detection pipeline.

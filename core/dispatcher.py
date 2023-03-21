@@ -50,7 +50,7 @@ class Dispatcher:
 
             for frame in frames:
                 frame, _, cam_id = frame
-                self.vop.display_frame(frame, cam_id)
+                # self.vop.display_frame(frame, cam_id)
         else:
             print("cameraPipelines does not exist.")
 

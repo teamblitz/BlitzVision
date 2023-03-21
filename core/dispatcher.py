@@ -1,3 +1,5 @@
+from networktables import NetworkTables
+
 from output_processor.robot_output_processor import RobotOutputProcessor
 from pipeline.tag_pipeline import ApriltagPipeline
 from pipeline.vision_pipeline import VisionPipeline
@@ -21,6 +23,9 @@ class Dispatcher:
 
         rc = RobotCommunicator()
         rc.start()
+
+        NetworkTables.initialize(server='10.20.83.2')
+        print("NT Client Established")
 
         self.quadCamera = QuadCameraReader((lambda x: self.listener(0, x)))
         self.quadCamera.start()

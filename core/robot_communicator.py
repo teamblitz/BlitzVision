@@ -23,7 +23,7 @@ class RobotCommunicator(Thread):
             robot_time = -1
 
             try:
-                robot_time = int.from_bytes(data, byteorder='big')
+                robot_time = int.from_bytes(data, byteorder='big', signed=True)
             except ValueError:
                 print(f"{data} is bad!!!")
 

@@ -32,9 +32,9 @@ class ApriltagPipeline(VisionPipeline):
                 for area_of_interest in areas_of_interest:
                     (x1, y1), (x2, y2) = area_of_interest
                     processing_frame = frame[y1:y2, x1:x2, :]
-                    pretime = time.perf_counter()
+                    # pretime = time.perf_counter()
                     detections: list[Detection] = self.detector.detect(processing_frame)
-                    print(time.perf_counter() - pretime)
+                    # print(time.perf_counter() - pretime)
                     for detection in detections:
                         if detection.hamming <= self.max_error:
                             translated_corners = [translate_translate_coordinates(x, y, area_of_interest[0]) for x, y in

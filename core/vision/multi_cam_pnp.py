@@ -4,6 +4,7 @@ from scipy import linalg
 from scipy.spatial.transform import Rotation as R
 from scipy.spatial.distance import euclidean
 
+
 def calc_cam_to_general_transform(cam_pose):
     """
     cam pose: (translation vector, rotation matrix)
@@ -43,12 +44,12 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
                 point = np.empty(3)
                 # print("Undistorted Point")
                 # print(undistorted_points[j])
-                point[:2] = undistorted_points[j] # - [1280 / 2, 800 / 2]
+                point[:2] = undistorted_points[j]  # - [1280 / 2, 800 / 2]
                 point[2] = 1
-                
+
                 # print("Shifted Point")
                 # print(point)
-                
+
                 point = point * (1 / linalg.norm(point))
                 # print("Normalized vector")
                 # print(point)
@@ -57,7 +58,7 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
                 point = cam_general_transforms[i][0:3, 0:3] @ (np.array(([0, 0, 1],
                                                                          [-1, 0, 0],
                                                                          [0, -1, 0])) @ point)
-                
+
                 # print("Rotated Point")
                 # print(point)
                 # normalize it to be a unit vector
@@ -75,12 +76,12 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
 
     if prev_pose is not None:
         for point, origin in zip(object_points, line_origins):
-            ranges.append(euclidean(point, (prev_pose@np.hstack((origin, 1)))[:3]))
+            ranges.append(euclidean(point, (prev_pose @ np.hstack((origin, 1)))[:3]))
     else:
         ranges = np.ones(len(object_points))
 
     ranges_array = np.asarray(ranges)
-    
+
     return gPPnP(line_versors_matrix, line_origins_matrix, object_points_matrix, ranges=ranges_array,
                  tol=(0.0001 ** 2) * np.prod(object_points_matrix.shape))
 

@@ -222,11 +222,12 @@ class RobotOutputProcessor:
         # self.lock.release()
 
     def calculate_areas_of_interest(self, cam_id: int):
-        for corners in self.last_detection_corners[cam_id]:
-            if len(corners) <= 0:
-                print(
-                    f"Corner length 0 when calculating areas of interest on cam id {cam_id} Last detection corners dump: {self.last_detection_corners}")
-            # our min and max values can start at the first corner coordinates
-
-        points, _ = cv2.projectPoints(self.april_tag_object_points, self.camera_poses_rt[cam_id][0],
-                                      self.camera_poses_rt[cam_id][1], )
+        # for corners in self.last_detection_corners[cam_id]:
+        #     if len(corners) <= 0:
+        #         print(
+        #             f"Corner length 0 when calculating areas of interest on cam id {cam_id} Last detection corners dump: {self.last_detection_corners}")
+        #     # our min and max values can start at the first corner coordinates
+        #
+        # points, _ = cv2.projectPoints(self.april_tag_object_points, self.camera_poses_rt[cam_id][0],
+        #                               self.camera_poses_rt[cam_id][1], )
+        pass

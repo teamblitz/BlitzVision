@@ -1,3 +1,5 @@
+import math
+
 from networktables import NetworkTables
 
 from output_processor.robot_output_processor import RobotOutputProcessor
@@ -12,9 +14,24 @@ from threading import Event
 from queue import Queue
 
 
+
 def calculate_areas_of_interest(cam_id: int, frame_size: Tuple[Any, Any]) -> Tuple[Tuple[int]]:
+    y_fov = 48
+    down_angle = 8.9 + 10
+    up_angle = 17.3 + 10
+
+    up_percent = up_angle/(y_fov/2)
+    down_percent = down_angle/(y_fov/2)
+
+    midline = frame_size[1]/2
+    upper_bound = midline + (frame_size[1]/2) * up_percent
+    lower_bound = midline - (frame_size[1]/2) * down_percent
+
+    upper_bound = min(frame_size[1], upper_bound)
+    lower_bound = max(0, lower_bound)
+
     """Frame size in width, height notation"""
-    return (((0, 0), frame_size),)
+    return (((0, lower_bound), (frame_size[0], upper_bound)),)
 
 
 class Dispatcher:

@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from scipy import linalg
 from scipy.spatial.transform import Rotation as R
+from scipy.spatial.distance import euclidean
 
 
 def calc_cam_to_general_transform(cam_pose):
@@ -18,7 +19,7 @@ def calc_cam_to_general_transform(cam_pose):
     return transform
 
 
-def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_coeffs):
+def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_coeffs, prev_pose=None):
     """
         obj_points:
             an "array like" of length n representing object points in the real world
@@ -43,12 +44,12 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
                 point = np.empty(3)
                 # print("Undistorted Point")
                 # print(undistorted_points[j])
-                point[:2] = undistorted_points[j] # - [1280 / 2, 800 / 2]
+                point[:2] = undistorted_points[j]  # - [1280 / 2, 800 / 2]
                 point[2] = 1
-                
+
                 # print("Shifted Point")
                 # print(point)
-                
+
                 point = point * (1 / linalg.norm(point))
                 # print("Normalized vector")
                 # print(point)
@@ -57,7 +58,7 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
                 point = cam_general_transforms[i][0:3, 0:3] @ (np.array(([0, 0, 1],
                                                                          [-1, 0, 0],
                                                                          [0, -1, 0])) @ point)
-                
+
                 # print("Rotated Point")
                 # print(point)
                 # normalize it to be a unit vector
@@ -71,16 +72,17 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
     line_origins_matrix = np.asarray(line_origins)
     object_points_matrix = np.asarray(object_points)
 
-    # print("Line_versors")
-    # print(line_versors_matrix)
+    ranges = []
 
-    # print("Line origins")
-    # print(line_origins_matrix)
+    if prev_pose is not None:
+        for point, origin in zip(object_points, line_origins):
+            ranges.append(euclidean(point, (prev_pose @ np.hstack((origin, 1)))[:3]))
+    else:
+        ranges = np.ones(len(object_points))
 
-    # print("Object points")
-    # print(object_points_matrix)
-    
-    return gPPnP(line_versors_matrix, line_origins_matrix, object_points_matrix,
+    ranges_array = np.asarray(ranges)
+
+    return gPPnP(line_versors_matrix, line_origins_matrix, object_points_matrix, ranges=ranges_array,
                  tol=(0.0001 ** 2) * np.prod(object_points_matrix.shape))
 
 
@@ -88,7 +90,7 @@ def calc(obj_points, img_points, cam_general_transforms, camera_matrices, dist_c
 # from A. Fusiello, F. Crosilla, and F. Malapelle, “Procrustean point-line
 # registration and the NPnP problem,” in 2015 International Conference on
 # 3D Vision, Oct. 2015, pp. 250–255. doi: 10.1109/3DV.2015.35.
-def gPPnP(P, O, S, tol, pz=True, unit_scale=True):
+def gPPnP(P, O, S, ranges, tol, pz=True, unit_scale=True):
     """
     input
         P : matrix (nx3) of line versors
@@ -103,7 +105,7 @@ def gPPnP(P, O, S, tol, pz=True, unit_scale=True):
     """
     n = P.shape[0]
     # print(P.shape, O.shape, S.shape)
-    Z = np.diag(np.ones(n))  # Z is n x n
+    Z = np.diag(ranges)  # Z is n x n
     II = np.identity(n) - np.full((n, n), 1.0 / n)  # II is n x n
     err = np.inf
     E_old = 1000 * np.ones((n, 3))  # E_old is n x 3

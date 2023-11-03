@@ -148,13 +148,14 @@ class RobotOutputProcessor:
             self.camera_matrices.append(file["cameraMatrix"])
             self.camera_dist_coeffs.append(file["distCoeffs"])
 
-
         self.transform_general_to_robot = np.zeros((4, 4))
         self.transform_general_to_robot[0:3, 0:3] = np.identity(3)
         self.transform_general_to_robot[0:3, 3] = [units.inches_to_meters(7.0625), 0, units.inches_to_meters(21)]
         self.transform_general_to_robot[3, 3] = 1
 
         self.lock = Lock()
+
+        self.prev_pose = None
 
     def process_quad_cam(self, inputs):
         # print(inputs)
@@ -191,17 +192,20 @@ class RobotOutputProcessor:
         if valid_tags > 0:
             # pretime = time.perf_counter()
             transform_general_to_world, _ = multi_cam_pnp.calc(obj_points, img_points, self.camera_transforms,
-                                                               self.camera_matrices, self.camera_dist_coeffs)
+                                                               self.camera_matrices, self.camera_dist_coeffs,
+                                                               prev_pose=self.prev_pose)
+            self.prev_pose = transform_general_to_world
+
             # print(time.perf_counter() - pretime)
             transform_robot_to_world = transform_general_to_world @ linalg.inv(self.transform_general_to_robot)
-
 
             NetworkTables.getEntry("/Jetson/pose/translation").setDoubleArray(list(transform_robot_to_world[0:3, 3]))
             NetworkTables.getEntry("/Jetson/pose/rotation").setDoubleArray(
                 transform_robot_to_world[0:3, 0:3].reshape(9).tolist())
 
             NetworkTables.getEntry("/Jetson/pose/delay").setDouble(time.perf_counter_ns() - timestamp)
-            NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(time_manager.get_instance().get_timestamp(pref_count=timestamp))
+            NetworkTables.getEntry("/Jetson/pose/timestamp").setDouble(
+                time_manager.get_instance().get_timestamp(pref_count=timestamp))
             NetworkTables.flush()
 
             # print("General To World")
@@ -218,11 +222,12 @@ class RobotOutputProcessor:
         # self.lock.release()
 
     def calculate_areas_of_interest(self, cam_id: int):
-        for corners in self.last_detection_corners[cam_id]:
-            if len(corners) <= 0:
-                print(
-                    f"Corner length 0 when calculating areas of interest on cam id {cam_id} Last detection corners dump: {self.last_detection_corners}")
-            # our min and max values can start at the first corner coordinates
-
-        points, _ = cv2.projectPoints(self.april_tag_object_points, self.camera_poses_rt[cam_id][0],
-                                      self.camera_poses_rt[cam_id][1], )
+        # for corners in self.last_detection_corners[cam_id]:
+        #     if len(corners) <= 0:
+        #         print(
+        #             f"Corner length 0 when calculating areas of interest on cam id {cam_id} Last detection corners dump: {self.last_detection_corners}")
+        #     # our min and max values can start at the first corner coordinates
+        #
+        # points, _ = cv2.projectPoints(self.april_tag_object_points, self.camera_poses_rt[cam_id][0],
+        #                               self.camera_poses_rt[cam_id][1], )
+        pass
